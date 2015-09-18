@@ -77,6 +77,10 @@ func (r Required) IsSatisfied(obj interface{}) bool {
 	if v.Kind() == reflect.Slice {
 		return v.Len() > 0
 	}
+	if v.IsNil() {
+		return false
+	}
+
 	return true
 }
 
