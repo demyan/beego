@@ -107,7 +107,7 @@ type Validation struct {
 // Clean all ValidationError.
 func (v *Validation) Clear() {
 	v.Errors = []*ValidationError{}
- 	v.ErrorsMap = nil
+	v.ErrorsMap = nil
 }
 
 // Has ValidationError nor not.
@@ -150,6 +150,21 @@ func (v *Validation) Max(obj interface{}, max int, key string) *ValidationResult
 // Test that the obj is between mni and max if obj's type is int
 func (v *Validation) Range(obj interface{}, min, max int, key string) *ValidationResult {
 	return v.apply(Range{Min{Min: min}, Max{Max: max}, key}, obj)
+}
+
+// Test that the obj is greater than min if obj's type is int64
+func (v *Validation) Min64(obj interface{}, min int64, key string) *ValidationResult {
+	return v.apply(Min64{min, key}, obj)
+}
+
+// Test that the obj is less than max if obj's type is int
+func (v *Validation) Max64(obj interface{}, max int64, key string) *ValidationResult {
+	return v.apply(Max64{max, key}, obj)
+}
+
+// Test that the obj is between mni and max if obj's type is int
+func (v *Validation) Range64(obj interface{}, min, max int64, key string) *ValidationResult {
+	return v.apply(Range64{Min64{Min: min}, Max64{Max: max}, key}, obj)
 }
 
 // Test that the obj is longer than min size if type is string or slice

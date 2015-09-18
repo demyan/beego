@@ -227,6 +227,8 @@ func magic(t reflect.Type, s string) (i interface{}, err error) {
 	switch t.Kind() {
 	case reflect.Int:
 		i, err = strconv.Atoi(s)
+	case reflect.Int64:
+		i, err = strconv.ParseInt(s, 10, 64)
 	case reflect.String:
 		i = s
 	case reflect.Ptr:

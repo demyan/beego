@@ -27,6 +27,9 @@ var MessageTmpls = map[string]string{
 	"Min":          "Minimum is %d",
 	"Max":          "Maximum is %d",
 	"Range":        "Range is %d to %d",
+	"Min64":        "Minimum int64 is %d",
+	"Max64":        "Maximum int64 is %d",
+	"Range64":      "Range int64 is %d to %d",
 	"MinSize":      "Minimum size is %d",
 	"MaxSize":      "Maximum size is %d",
 	"Length":       "Required length is %d",
@@ -57,10 +60,6 @@ type Required struct {
 }
 
 func (r Required) IsSatisfied(obj interface{}) bool {
-	if obj == nil {
-		return false
-	}
-
 	if str, ok := obj.(string); ok {
 		return len(str) > 0
 	}
@@ -68,6 +67,9 @@ func (r Required) IsSatisfied(obj interface{}) bool {
 		return true
 	}
 	if i, ok := obj.(int); ok {
+		return i != 0
+	}
+	if i, ok := obj.(int64); ok {
 		return i != 0
 	}
 	if t, ok := obj.(time.Time); ok {
@@ -80,7 +82,6 @@ func (r Required) IsSatisfied(obj interface{}) bool {
 	if v.IsNil() {
 		return false
 	}
-
 	return true
 }
 
@@ -167,6 +168,79 @@ func (r Range) GetKey() string {
 
 func (r Range) GetLimitValue() interface{} {
 	return []int{r.Min.Min, r.Max.Max}
+}
+
+type Min64 struct {
+	Min int64
+	Key string
+}
+
+func (m Min64) IsSatisfied(obj interface{}) bool {
+	num, ok := obj.(int64)
+	if ok {
+		return num >= m.Min
+	}
+	return false
+}
+
+func (m Min64) DefaultMessage() string {
+	return fmt.Sprintf(MessageTmpls["Min64"], m.Min)
+}
+
+func (m Min64) GetKey() string {
+	return m.Key
+}
+
+func (m Min64) GetLimitValue() interface{} {
+	return m.Min
+}
+
+type Max64 struct {
+	Max int64
+	Key string
+}
+
+func (m Max64) IsSatisfied(obj interface{}) bool {
+	num, ok := obj.(int64)
+	if ok {
+		return num <= m.Max
+	}
+	return false
+}
+
+func (m Max64) DefaultMessage() string {
+	return fmt.Sprintf(MessageTmpls["Max64"], m.Max)
+}
+
+func (m Max64) GetKey() string {
+	return m.Key
+}
+
+func (m Max64) GetLimitValue() interface{} {
+	return m.Max
+}
+
+// Requires an integer to be within Min, Max inclusive.
+type Range64 struct {
+	Min64
+	Max64
+	Key string
+}
+
+func (r Range64) IsSatisfied(obj interface{}) bool {
+	return r.Min64.IsSatisfied(obj) && r.Max64.IsSatisfied(obj)
+}
+
+func (r Range64) DefaultMessage() string {
+	return fmt.Sprintf(MessageTmpls["Range64"], r.Min64.Min, r.Max64.Max)
+}
+
+func (r Range64) GetKey() string {
+	return r.Key
+}
+
+func (r Range64) GetLimitValue() interface{} {
+	return []int64{r.Min64.Min, r.Max64.Max}
 }
 
 // Requires an array or string to be at least a given length.
